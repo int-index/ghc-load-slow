@@ -9,17 +9,16 @@
     { self, nixpkgs }:
     let
       system = "x86_64-linux";
-      ghc = "ghc944";
+      ghc = "ghc962";
       pkgs = nixpkgs.legacyPackages.${system};
       haskellPackages =
         pkgs.haskell.packages.${ghc}.extend(hself: hsuper: {
-          sdl2 = pkgs.haskell.lib.dontCheck (hself.callHackage "sdl2" "2.5.4.0" {});
-          hspec-contrib = hself.callHackage "hspec-contrib" "0.5.1.1" {};
+          shelly = pkgs.haskell.lib.dontCheck (hself.callHackage "shelly" "1.12.1" {});
           gls-platform = haskellPackages.callCabal2nix "gls-platform" "${self}/src/platform/" {};
           gls-exe = haskellPackages.callCabal2nix "gls-exe" "${self}/src/exe/" {};
         });
       glsRuntimeEnv = haskellPackages.ghcWithPackages(p: [p.gls-platform]);
-      GLS_LIBDIR = "${glsRuntimeEnv}/lib/ghc-${glsRuntimeEnv.version}";
+      GLS_LIBDIR = "${glsRuntimeEnv}/lib/ghc-${glsRuntimeEnv.version}/lib";
     in
     {
       packages.${system}.ghc-load-slow =
@@ -38,8 +37,6 @@
       devShell.${system} = pkgs.mkShell {
         buildInputs = [
           glsRuntimeEnv
-          haskellPackages.hie-bios
-          haskellPackages.haskell-language-server
           haskellPackages.cabal-install
         ];
         inherit GLS_LIBDIR;
