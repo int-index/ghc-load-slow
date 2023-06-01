@@ -11,6 +11,7 @@ import qualified Data.Text as Text
 import Data.Ratio
 import System.CPUTime
 import Data.Fixed
+import Data.Foldable (for_)
 
 import qualified GHC
 import qualified GHC.Data.Bag as GHC
@@ -21,10 +22,15 @@ import qualified GHC.Data.FastString as GHC
 import qualified GHC.Types.Basic as GHC
 import qualified GHC.Utils.Lexeme as GHC
 import qualified GHC.Driver.Session as GHC
+import qualified GHC.Utils.Outputable as GHC
 import qualified GHC.LanguageExtensions as GHC.LangExt
 
 main :: IO ()
 main = do
+  -- Print what we compile:
+  for_ ghcDecls \ghcDecl -> putStrLn $ GHC.showPprUnsafe ghcDecl
+  putStrLn $ GHC.showPprUnsafe ghcExpr
+  -- Compile and measure:
   pkgPaths <- getPkgPaths
   putStrLn "First run:"
   compileApp pkgPaths
