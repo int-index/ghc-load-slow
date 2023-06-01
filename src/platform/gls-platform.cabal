@@ -1,0 +1,39 @@
+cabal-version:       3.0
+name:                gls-platform
+version:             0
+
+library
+  exposed-modules:
+    GLS_Platform
+  build-depends:
+    base,
+    text,
+    bytestring,
+    containers,
+    unordered-containers,
+    hashable,
+    mtl,
+    primitive,
+    vector,
+    sdl2,
+    freetype2,
+    filepath,
+    directory,
+    base64,
+    cryptohash-sha256,
+    fsnotify
+  default-language: GHC2021
+  default-extensions:
+    BlockArguments
+    StrictData
+    NamedFieldPuns
+    PatternGuards
+    OverloadedStrings
+    DuplicateRecordFields
+    NoFieldSelectors
+    OverloadedRecordDot
+    ImplicitParams
+    PatternSynonyms
+    DataKinds
+    DerivingStrategies
+  ghc-options: -Wall -Wno-unused-do-bind

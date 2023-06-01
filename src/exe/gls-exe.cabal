@@ -1,0 +1,31 @@
+cabal-version:       3.0
+name:                gls-exe
+version:             0
+
+executable gls-exe
+  main-is: Main.hs
+  build-depends:
+    base,
+    text,
+    directory,
+    filepath,
+    optparse-applicative,
+    ghc,
+    ghc-boot,
+    template-haskell,
+    scientific
+  build-tool-depends: happy:happy
+  default-language: GHC2021
+  default-extensions:
+    BlockArguments
+    StrictData
+    NamedFieldPuns
+    PatternGuards
+    OverloadedStrings
+    DuplicateRecordFields
+    NoFieldSelectors
+    OverloadedRecordDot
+    DataKinds
+    StandaloneKindSignatures
+    GADTs
+  ghc-options: -threaded -Wall -Wno-unused-do-bind -Wno-unticked-promoted-constructors
