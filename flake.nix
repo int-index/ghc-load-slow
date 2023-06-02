@@ -38,6 +38,7 @@
         buildInputs = [
           glsRuntimeEnv
           haskellPackages.cabal-install
+          haskellPackages.haskell-language-server
         ];
         inherit GLS_LIBDIR;
       };

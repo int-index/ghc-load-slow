@@ -1,3 +1,20 @@
+{-# OPTIONS -fprof-late #-}
+
+{-# LANGUAGE
+    BlockArguments,
+    StrictData,
+    NamedFieldPuns,
+    PatternGuards,
+    OverloadedStrings,
+    DuplicateRecordFields,
+    NoFieldSelectors,
+    OverloadedRecordDot,
+    ImplicitParams,
+    PatternSynonyms,
+    DataKinds,
+    DerivingStrategies
+#-}
+
 module Main (main) where
 
 import Data.Foldable (toList)
@@ -13,6 +30,7 @@ import System.CPUTime
 import Data.Fixed
 import Data.Foldable (for_)
 
+import qualified CopyGHC
 import qualified GHC
 import qualified GHC.Data.Bag as GHC
 import qualified GHC.Types.Name as GHC
@@ -79,10 +97,10 @@ ghcLoadApp pkgPaths = do
     GHC.setContext [GHC.IIDecl importGLSPlatform]
     p2 <- liftIO $ getCPUTime
     liftIO $ putStrLn ("Set context: " ++ show (MkFixed (p2 - p1) :: Pico))
-    GHC.runParsedDecls ghcDecls
+    CopyGHC.runParsedDecls ghcDecls
     p3 <- liftIO $ getCPUTime
     liftIO $ putStrLn ("Run decls: " ++ show (MkFixed (p3 - p2) :: Pico))
-    GHC.compileParsedExpr ghcExpr
+    CopyGHC.compileParsedExpr ghcExpr
     p4 <- liftIO $ getCPUTime
     liftIO $ putStrLn ("Compile expr: " ++ show (MkFixed (p4 - p3) :: Pico))
   where

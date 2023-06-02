@@ -37,3 +37,4 @@ library
     DataKinds
     DerivingStrategies
   ghc-options: -Wall -Wno-unused-do-bind
+  ghc-options: -rtsopts
