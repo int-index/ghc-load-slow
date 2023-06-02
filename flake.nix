@@ -9,7 +9,7 @@
     { self, nixpkgs }:
     let
       system = "x86_64-linux";
-      ghc = "ghc962";
+      ghc = "ghc92";
       pkgs = nixpkgs.legacyPackages.${system};
       haskellPackages =
         pkgs.haskell.packages.${ghc}.extend(hself: hsuper: {
@@ -18,7 +18,7 @@
           gls-exe = haskellPackages.callCabal2nix "gls-exe" "${self}/src/exe/" {};
         });
       glsRuntimeEnv = haskellPackages.ghcWithPackages(p: [p.gls-platform]);
-      GLS_LIBDIR = "${glsRuntimeEnv}/lib/ghc-${glsRuntimeEnv.version}/lib";
+      GLS_LIBDIR = "${glsRuntimeEnv}/lib/ghc-${glsRuntimeEnv.version}";
     in
     {
       packages.${system}.ghc-load-slow =

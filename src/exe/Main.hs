@@ -17,12 +17,12 @@ import qualified GHC
 import qualified GHC.Data.Bag as GHC
 import qualified GHC.Types.Name as GHC
 import qualified GHC.Types.SourceText as GHC
-import qualified GHC.Types.PkgQual as GHC
 import qualified GHC.Data.FastString as GHC
 import qualified GHC.Types.Basic as GHC
 import qualified GHC.Utils.Lexeme as GHC
 import qualified GHC.Driver.Session as GHC
 import qualified GHC.Utils.Outputable as GHC
+import qualified GHC.Unit.Types as GHC
 import qualified GHC.LanguageExtensions as GHC.LangExt
 
 main :: IO ()
@@ -89,7 +89,7 @@ ghcLoadApp pkgPaths = do
     modify_dflags :: GHC.DynFlags -> GHC.DynFlags
     modify_dflags dflags =
       dflags
-        { GHC.backend = GHC.ncgBackend,
+        { GHC.backend = GHC.NCG,
           GHC.ghcLink = GHC.LinkBinary,
           GHC.packageDBFlags = [
               -- 1. Install the platform in an isolated dir: CABAL_DIR="$(pwd)/platform-cabal/" cabal install --lib gls-platform
@@ -145,14 +145,16 @@ glsPlatformModuleAlias = GHC.mkModuleName "GLS"
 importGLSPlatform :: GHC.ImportDecl GHC.GhcPs
 importGLSPlatform =
   GHC.ImportDecl {
-      GHC.ideclExt       = GHC.XImportDeclPass GHC.noAnn GHC.NoSourceText False,
-      GHC.ideclName      = GHC.noLocA glsPlatformModuleName,
-      GHC.ideclPkgQual   = GHC.RawPkgQual (GHC.StringLiteral GHC.NoSourceText "gls-platform" Nothing),
+      GHC.ideclExt       = GHC.noAnn,
+      GHC.ideclSourceSrc = GHC.NoSourceText,
       GHC.ideclSource    = GHC.NotBoot,
+      GHC.ideclImplicit  = False,
+      GHC.ideclHiding    = Nothing,
+      GHC.ideclName      = GHC.noLocA glsPlatformModuleName,
+      GHC.ideclPkgQual   = Just $ GHC.StringLiteral GHC.NoSourceText "gls-platform" Nothing,
       GHC.ideclSafe      = False,
       GHC.ideclQualified = GHC.QualifiedPre,
-      GHC.ideclAs        = Just $ GHC.noLocA glsPlatformModuleAlias,
-      GHC.ideclImportList = Nothing
+      GHC.ideclAs        = Just $ GHC.noLocA glsPlatformModuleAlias
     }
 
 tgDataDecl :: GHC.RdrName -> GHC.RdrName -> [GHC.LHsType GHC.GhcPs] -> GHC.LHsDecl GHC.GhcPs
@@ -166,12 +168,13 @@ tgDataDecl tyName conName fieldTys =
       GHC.tcdDataDefn =
         GHC.HsDataDefn {
           GHC.dd_ext = GHC.noExtField,
+          GHC.dd_ND = GHC.DataType,
           GHC.dd_cType = Nothing,
           GHC.dd_ctxt = Nothing,
           GHC.dd_kindSig = Nothing,
           GHC.dd_derivs = [],
           GHC.dd_cons =
-            GHC.DataTypeCons False [GHC.noLocA $ GHC.ConDeclH98 {
+            [GHC.noLocA $ GHC.ConDeclH98 {
               GHC.con_ext = GHC.noAnn,
               GHC.con_name = GHC.noLocA conName,
               GHC.con_forall = False,
@@ -214,7 +217,7 @@ tgFunApp fn arg =
 
 tgLetRec :: [(GHC.LPat GHC.GhcPs, GHC.LHsExpr GHC.GhcPs)] -> GHC.LHsExpr GHC.GhcPs -> GHC.LHsExpr GHC.GhcPs
 tgLetRec bindings e =
-  GHC.noLocA $ GHC.HsLet GHC.noAnn GHC.noHsTok (toGhcBindings bindings) GHC.noHsTok e
+  GHC.noLocA $ GHC.HsLet GHC.noAnn (toGhcBindings bindings) e
 
 toGhcBindings :: [(GHC.LPat GHC.GhcPs, GHC.LHsExpr GHC.GhcPs)] -> GHC.HsLocalBinds GHC.GhcPs
 toGhcBindings bindings =
@@ -227,10 +230,10 @@ toGhcBindings bindings =
 toGhcBinding :: GHC.LPat GHC.GhcPs -> GHC.LHsExpr GHC.GhcPs -> GHC.LHsBindLR GHC.GhcPs GHC.GhcPs
 toGhcBinding lhs rhs =
   GHC.noLocA $
-    GHC.PatBind GHC.noAnn lhs (mkGRHSs rhs)
+    GHC.PatBind GHC.noAnn lhs (mkGRHSs rhs) ([], [])
   where
     mkGRHSs :: GHC.LHsExpr GHC.GhcPs -> GHC.GRHSs GHC.GhcPs (GHC.LHsExpr GHC.GhcPs)
-    mkGRHSs e = (GHC.GRHSs GHC.emptyComments [GHC.noLocA $ GHC.GRHS GHC.noAnn [] e] GHC.emptyLocalBinds)
+    mkGRHSs e = (GHC.GRHSs GHC.emptyComments [GHC.noLoc $ GHC.GRHS GHC.noAnn [] e] GHC.emptyLocalBinds)
 
 data NameCtx = CtxType | CtxTerm
 
